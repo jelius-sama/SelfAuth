@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      width: 320px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 12px;
+    }
+
+    .error {
+      color: #b00020;
+      margin-top: 8px;
+      font-size: 0.9em;
+    }
+
+    .fatal {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app" class="card"></div>
+
+<script>
+  const app = document.getElementById("app");
+  const redirectTarget = encodeURIComponent(window.location.pathname);
+
+  function showLoginForm(errorMessage = "") {
+    app.innerHTML = `
+      <h2>Login</h2>
+      <input id="email" type="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Password" />
+      <button onclick="submitLogin()">Continue</button>
+      ${errorMessage ? `<div class="error">${errorMessage}</div>` : ""}
+    `;
+  }
+
+  function showOTPForm(errorMessage = "") {
+    app.innerHTML = `
+      <h2>Enter OTP</h2>
+      <input id="otp" type="text" placeholder="One-time password" />
+      <button onclick="submitOTP()">Verify</button>
+      ${errorMessage ? `<div class="error">${errorMessage}</div>` : ""}
+    `;
+  }
+
+  function showFatalError() {
+    app.innerHTML = `
+      <div class="fatal">
+        <h2>Server Error</h2>
+        <p>Something went wrong on our side.<br>Please try again later.</p>
+      </div>
+    `;
+  }
+
+  async function submitLogin() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+      const res = await fetch("/_auth/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (res.status === 200) {
+        showOTPForm();
+      } else if (res.status >= 500) {
+        showFatalError();
+      } else {
+        showLoginForm("Invalid email or password.");
+      }
+    } catch {
+      showFatalError();
+    }
+  }
+
+  async function submitOTP() {
+    const otp = document.getElementById("otp").value;
+
+    try {
+      const res = await fetch("/_auth/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otp })
+      });
+
+      if (res.status === 200) {
+        // Full page redirect after successful OTP
+        window.location.href = "/_auth/check?redirect=" + redirectTarget;
+      } else if (res.status >= 500) {
+        showFatalError();
+      } else {
+        showOTPForm("Invalid OTP.");
+      }
+    } catch {
+      showFatalError();
+    }
+  }
+
+  // Initial render
+  showLoginForm();
+</script>
+
+</body>
+</html>
