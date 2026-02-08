@@ -23,7 +23,8 @@ let package = Package(
             path: "Sources/Libmailer",
             publicHeadersPath: ".",
             linkerSettings: [
-                .linkedLibrary("mailer")
+                .unsafeFlags(["-L", "Sources/Libmailer"]),
+                .linkedLibrary("mailer"),
             ]
         ),
         .executableTarget(

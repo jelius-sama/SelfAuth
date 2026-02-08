@@ -52,7 +52,15 @@ enum APIRouter {
         }
 
         router.post("/_auth/submit") { req in
-            return AuthSubmit.handler(req: req)
+            let resp = AuthSubmit.handler(req: req)
+
+            switch resp {
+            case .Success(let response):
+                return response
+
+            case .Error(let error):
+                throw error
+            }
         }
 
         router.get("/version") { _ in
