@@ -18,7 +18,7 @@ jobs:
 
     steps:
       # ---- Checkout ----
-      - name: Checkout repository (recursive)
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -30,20 +30,25 @@ jobs:
         with:
           go-version: "1.22"
 
-      # ---- Swift (macOS) ----
-      - name: Set up Swift 6.0 (macOS)
-        if: runner.os == 'macOS'
+      # ---- Swift ----
+      - name: Set up Swift (latest)
         uses: swift-actions/setup-swift@v2
         with:
-          swift-version: "6.0"
+          swift-version: "latest"
 
-      # ---- Swift (Linux) ----
-      - name: Install Swift 6.0 (Linux)
+      # ---- macOS deps ----
+      - name: Select Xcode (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app
+          xcrun --show-sdk-path
+
+      # ---- Linux deps ----
+      - name: Install system dependencies (Linux only)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            curl \
             clang \
             libicu-dev \
             libssl-dev \
@@ -51,15 +56,6 @@ jobs:
             libxml2-dev \
             libz-dev
 
-          SWIFT_VERSION=6.0
-          UBUNTU_VERSION=22.04
-
-          curl -fsSL https://download.swift.org/swift-${SWIFT_VERSION}-release/ubuntu${UBUNTU_VERSION}/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-ubuntu${UBUNTU_VERSION}.tar.gz \
-            | sudo tar -xz -C /opt
-
-          echo "/opt/swift-${SWIFT_VERSION}-RELEASE-ubuntu${UBUNTU_VERSION}/usr/bin" >> $GITHUB_PATH
-
-      # ---- Sanity check ----
       - name: Verify toolchains
         run: |
           swift --version
