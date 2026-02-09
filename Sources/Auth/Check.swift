@@ -40,6 +40,16 @@ struct AuthCheck {
                 )
             }
 
+            if req.path.starts(with: "/_auth/check") {
+                return .Success(
+                    HTTPResponse(
+                        status: .temporaryRedirect,
+                        headers: ["Location": "/"],
+                        body: nil
+                    )
+                )
+            }
+
             return .Success(.text("authorized"))
         }
     }
