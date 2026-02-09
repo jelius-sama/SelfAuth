@@ -5,7 +5,15 @@ struct AuthCheck {
                 let token = findCookie(named: "auth_token", in: req.headers["Cookie"]),
                 await TokenStore.shared.isValid(token)
             else {
-                return .Error(APIError.unauthorized)
+                // Get the original request path to redirect back after login
+                let originalPath = req.path
+                let redirectURL = "/_auth/login?redirect=\(originalPath)"
+
+                // Return 302 redirect
+                return .Success(
+                    HTTPResponse(
+                        status: .temporaryRedirect, headers: ["Location": redirectURL], body: nil)
+                )
             }
 
             return .Success(.text("authorized"))

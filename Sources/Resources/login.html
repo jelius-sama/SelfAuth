@@ -114,8 +114,11 @@
       });
 
       if (res.status === 200) {
-        // Full page redirect after successful OTP
-        window.location.href = "/_auth/check?redirect=" + redirectTarget;
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get("redirect");
+
+        // Direct redirect to the target path
+        window.location.href = redirect && redirect.startsWith("/") ? redirect : "/";
       } else if (res.status >= 500) {
         showFatalError();
       } else {
