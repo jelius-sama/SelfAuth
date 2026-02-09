@@ -33,6 +33,8 @@ jobs:
       # ---- Swift ----
       - name: Set up Swift (latest)
         uses: swift-actions/setup-swift@v3
+        with:
+          skip-verify-signature: true
 
       # ---- macOS deps ----
       - name: Select Xcode (macOS)
