@@ -8,13 +8,8 @@ on:
 
 jobs:
   build:
-    name: Build (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+    name: Build
+    runs-on: ubuntu-latest
 
     steps:
       # ---- Checkout ----
@@ -31,21 +26,13 @@ jobs:
           go-version: "1.22"
 
       # ---- Swift ----
-      - name: Set up Swift (latest)
+      - name: Set up Swift
         uses: swift-actions/setup-swift@v3
         with:
           skip-verify-signature: true
 
-      # ---- macOS deps ----
-      - name: Select Xcode (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          sudo xcode-select -s /Applications/Xcode.app
-          xcrun --show-sdk-path
-
       # ---- Linux deps ----
-      - name: Install system dependencies (Linux only)
-        if: runner.os == 'Linux'
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -56,6 +43,7 @@ jobs:
             libxml2-dev \
             libz-dev
 
+      # ---- Sanity check ----
       - name: Verify toolchains
         run: |
           swift --version
@@ -63,18 +51,16 @@ jobs:
 
       # ---- Build ----
       - name: Build (compile check)
-        run: |
-          make build
+        run: make build
 
       # ---- Verify output ----
       - name: Verify binary exists
-        run: |
-          test -f bin/SelfAuth
+        run: test -f bin/SelfAuth
 
       # ---- Artifact ----
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SelfAuth-${{ runner.os }}
+          name: SelfAuth-linux
           path: bin/SelfAuth
 
