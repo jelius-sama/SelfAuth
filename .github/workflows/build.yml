@@ -1,0 +1,58 @@
+name: Build and Test Compile
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ---- Swift ----
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "5.9"
+
+      # ---- Go ----
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      # ---- Linux system deps ----
+      - name: Install system dependencies (Linux only)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev
+
+      # ---- Build ----
+      - name: Build (compile check)
+        run: |
+          make build
+
+      # ---- Sanity check ----
+      - name: Verify binary exists
+        run: |
+          test -f bin/SelfAuth
+
+      # ---- Artifact ----
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SelfAuth-${{ runner.os }}
+          path: bin/SelfAuth
+
