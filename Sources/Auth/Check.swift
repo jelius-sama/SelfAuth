@@ -5,14 +5,34 @@ struct AuthCheck {
                 let token = findCookie(named: "auth_token", in: req.headers["Cookie"]),
                 await TokenStore.shared.isValid(token)
             else {
-                // Get the original request path to redirect back after login
-                let originalPath = req.path
-                let redirectURL = "/_auth/login?redirect=\(originalPath)"
+                // Get the original request path from Caddy's forwarded header
+                let originalPath = req.headers["X-SelfAuth-Original-URI"].first ?? "/"
+
+                // Prevent redirect loop if somehow /_auth/check is the path
+                let redirectPath = originalPath == "/_auth/check" ? "/" : originalPath
+
+                let redirectURL = "/_auth/login?redirect=\(redirectPath)"
 
                 // Return 302 redirect
                 return .Success(
                     HTTPResponse(
-                        status: .temporaryRedirect, headers: ["Location": redirectURL], body: nil)
+                        status: .temporaryRedirect,
+                        headers: ["Location": redirectURL],
+                        body: nil
+                    )
+                )
+            }
+
+            // If someone accesses /_auth/check directly with valid auth,
+            // redirect to home instead of showing "authorized" text
+            let originalPath = req.headers["X-SelfAuth-Original-URI"].first ?? "/"
+            if originalPath == "/_auth/check" {
+                return .Success(
+                    HTTPResponse(
+                        status: .temporaryRedirect,
+                        headers: ["Location": "/"],
+                        body: nil
+                    )
                 )
             }
 
