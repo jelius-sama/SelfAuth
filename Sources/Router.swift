@@ -64,7 +64,7 @@ enum APIRouter {
         }
 
         router.get("/version") { _ in
-            .text(VERSION)
+            .text(Environment.VERSION)
         }
 
         // Health check

@@ -4,9 +4,6 @@ import Foundation
 import Libmailer
 
 struct AuthSubmit {
-    // TODO: Maybe we don't want to be hardcodig my email
-    private static let adminEmail = "personal@jelius.dev"
-
     static func handler(req: HTTPRequest) -> APIRouter.Response {
         return APIRouter.runSync {
             // Parse request body (assume JSON for now)
@@ -101,8 +98,7 @@ struct AuthSubmit {
     }
 
     private static func validatePassword(email: String, password: String) -> Bool {
-        // TODO: Move this to external variables and don't use plain text passwords
-        return email == adminEmail && password == "123456789"
+        return email == Environment.ADMIN_EMAIL && Environment.verifyPassword(password)
     }
 
     private static func sendOTPMail(_ otp: String) -> Bool {
@@ -123,7 +119,7 @@ struct AuthSubmit {
         }
 
         if let config = config {
-            let receiver = strdup(adminEmail)
+            let receiver = strdup(Environment.ADMIN_EMAIL)
             let subject = strdup("Your OTP")
             let body = strdup("\(otp)")
             var ret = true

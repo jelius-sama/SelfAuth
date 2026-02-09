@@ -2,45 +2,296 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication Required</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=VT323&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-primary: #0a0e14;
+      --bg-secondary: #131820;
+      --bg-tertiary: #1a1f28;
+      --border-color: #2d3541;
+      --text-primary: #e6e6e6;
+      --text-secondary: #8a93a5;
+      --text-muted: #5c6370;
+      --accent-green: #00ff88;
+      --accent-cyan: #00ddff;
+      --accent-red: #ff4466;
+      --glow-green: rgba(0, 255, 136, 0.3);
+      --glow-cyan: rgba(0, 221, 255, 0.3);
+      --scanline-opacity: 0.05;
+    }
+    
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.97; }
+    }
+    
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    
+    @keyframes glow-pulse {
+      0%, 100% { text-shadow: 0 0 10px var(--glow-green), 0 0 20px var(--glow-green); }
+      50% { text-shadow: 0 0 15px var(--glow-green), 0 0 30px var(--glow-green); }
+    }
+    
+    @keyframes slideIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0);
+      }
+    }
+    
     body {
-      font-family: system-ui, sans-serif;
-      background: #f5f5f5;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      position: relative;
+      animation: flicker 0.15s infinite;
+      padding: 1rem;
     }
-
+    
+    /* CRT Effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(0, 0, 0, var(--scanline-opacity)) 50%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    
+    /* Scanline animation */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0, 255, 136, 0.1),
+        transparent
+      );
+      animation: scanline 6s linear infinite;
+      pointer-events: none;
+      z-index: 9998;
+    }
+    
     .card {
-      background: white;
-      padding: 24px;
-      border-radius: 8px;
-      width: 320px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      box-shadow: 
+        0 0 30px rgba(0, 255, 136, 0.1),
+        inset 0 0 60px rgba(0, 255, 136, 0.02);
+      animation: slideIn 0.5s ease;
     }
-
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent,
+        var(--accent-green) 30%,
+        var(--accent-cyan) 70%,
+        transparent
+      );
+    }
+    
+    h2 {
+      font-family: 'VT323', monospace;
+      font-size: 2.5rem;
+      color: var(--accent-green);
+      letter-spacing: 3px;
+      margin-bottom: 0.5rem;
+      text-shadow: 
+        0 0 10px var(--glow-green),
+        0 0 20px var(--glow-green);
+      animation: glow-pulse 3s ease-in-out infinite;
+    }
+    
+    .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      letter-spacing: 1px;
+    }
+    
+    .subtitle::before {
+      content: '▸ ';
+      color: var(--accent-cyan);
+    }
+    
     input {
       width: 100%;
-      padding: 8px;
-      margin: 8px 0;
+      padding: 0.9rem;
+      margin: 0.75rem 0;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
     }
-
+    
+    input:focus {
+      outline: none;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 15px var(--glow-green);
+      background: var(--bg-primary);
+    }
+    
+    input::placeholder {
+      color: var(--text-muted);
+    }
+    
     button {
       width: 100%;
-      padding: 10px;
-      margin-top: 12px;
+      padding: 0.9rem 1.5rem;
+      margin-top: 1.5rem;
+      border: 1px solid var(--accent-green);
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--accent-green);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 500;
     }
-
+    
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(0, 255, 136, 0.3), transparent);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+      border-radius: 50%;
+    }
+    
+    button:hover::before {
+      width: 400px;
+      height: 400px;
+    }
+    
+    button:hover {
+      background: rgba(0, 255, 136, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 30px var(--glow-green);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
     .error {
-      color: #b00020;
-      margin-top: 8px;
-      font-size: 0.9em;
+      color: var(--accent-red);
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      padding: 0.75rem;
+      background: rgba(255, 68, 102, 0.1);
+      border: 1px solid var(--accent-red);
+      border-left: 3px solid var(--accent-red);
+      animation: slideIn 0.3s ease;
     }
-
+    
+    .error::before {
+      content: '✕ ';
+      font-weight: bold;
+    }
+    
     .fatal {
       text-align: center;
+    }
+    
+    .fatal h2 {
+      color: var(--accent-red);
+      text-shadow: 
+        0 0 10px rgba(255, 68, 102, 0.3),
+        0 0 20px rgba(255, 68, 102, 0.3);
+    }
+    
+    .fatal p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-top: 1rem;
+    }
+    
+    .info-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+    }
+    
+    /* Input labels for better accessibility */
+    .input-group {
+      margin-bottom: 0.5rem;
+    }
+    
+    .input-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.3rem;
+      display: block;
+    }
+    
+    /* Responsive */
+    @media (max-width: 480px) {
+      .card {
+        padding: 2rem 1.5rem;
+      }
+      
+      h2 {
+        font-size: 2rem;
+      }
     }
   </style>
 </head>
@@ -54,27 +305,40 @@
 
   function showLoginForm(errorMessage = "") {
     app.innerHTML = `
-      <h2>Login</h2>
-      <input id="email" type="email" placeholder="Email" />
-      <input id="password" type="password" placeholder="Password" />
-      <button onclick="submitLogin()">Continue</button>
+      <h2>ACCESS</h2>
+      <div class="subtitle">System Authentication Required</div>
+      <div class="input-group">
+        <label class="input-label">Email Address</label>
+        <input id="email" type="email" placeholder="user@example.com" />
+      </div>
+      <div class="input-group">
+        <label class="input-label">Password</label>
+        <input id="password" type="password" placeholder="Enter your password" />
+      </div>
+      <button onclick="submitLogin()">▸ Continue</button>
       ${errorMessage ? `<div class="error">${errorMessage}</div>` : ""}
     `;
   }
 
   function showOTPForm(errorMessage = "") {
     app.innerHTML = `
-      <h2>Enter OTP</h2>
-      <input id="otp" type="text" placeholder="One-time password" />
-      <button onclick="submitOTP()">Verify</button>
+      <h2>VERIFY</h2>
+      <div class="subtitle">Two-Factor Authentication</div>
+      <div class="input-group">
+        <label class="input-label">One-Time Password</label>
+        <input id="otp" type="text" placeholder="Enter 6-digit code" maxlength="6" />
+      </div>
+      <button onclick="submitOTP()">▸ Verify</button>
       ${errorMessage ? `<div class="error">${errorMessage}</div>` : ""}
+      <div class="info-text">Check your authenticator app or email</div>
     `;
   }
 
   function showFatalError() {
     app.innerHTML = `
       <div class="fatal">
-        <h2>Server Error</h2>
+        <h2>ERROR</h2>
+        <div class="subtitle">System Unavailable</div>
         <p>Something went wrong on our side.<br>Please try again later.</p>
       </div>
     `;
