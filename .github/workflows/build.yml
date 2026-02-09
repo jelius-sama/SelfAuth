@@ -11,7 +11,18 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
 
+    container:
+      image: amazonlinux:2023
+      options: >
+        --entrypoint /bin/bash
+
     steps:
+      # ---- Bootstrap container ----
+      - name: Install base tools (tar, git)
+        run: |
+          dnf update -y
+          dnf install -y tar git
+
       # ---- Checkout ----
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,38 +30,22 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      # ---- Go ----
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-
-      # ---- Swift ----
-      - name: Set up Swift
-        uses: swift-actions/setup-swift@v3
-        with:
-          skip-verify-signature: true
-
-      # ---- Linux deps ----
-      - name: Install system dependencies
+      # ---- Toolchains ----
+      - name: Install Go and Swift
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            clang \
-            libicu-dev \
-            libssl-dev \
-            libcurl4-openssl-dev \
-            libxml2-dev \
-            libz-dev
+          dnf install -y \
+            golang \
+            swiftlang \
+            make
 
-      # ---- Sanity check ----
       - name: Verify toolchains
         run: |
           swift --version
+          swiftc --version
           go version
 
       # ---- Build ----
-      - name: Build (compile check)
+      - name: Build
         run: make build
 
       # ---- Verify output ----
@@ -61,6 +56,5 @@ jobs:
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SelfAuth-linux
+          name: SelfAuth-linux-amazonlinux2023
           path: bin/SelfAuth
-
