@@ -72,14 +72,19 @@ struct Entry {
     private static func checkEnv() {
         if !Environment.configureEnv() {
             // Check if stdin is a terminal (interactive)
-            if isatty(STDIN_FILENO) == 1 {
-                fputs("\(Color.red)\(Color.bold)ERROR: Server not configured\(Color.reset)", stderr)
-                fputs(
-                    "\(Color.red)Cannot prompt for configuration in non-interactive mode\(Color.reset)",
-                    stderr)
-                fputs(
-                    "\(Color.red)Please run 'selfauth config' in an interactive terminal first\(Color.reset)",
-                    stderr)
+            if isatty(STDIN_FILENO) != 1 {
+                let messages = [
+                    "\(Color.red)\(Color.bold)ERROR: Server not configured\(Color.reset)\n",
+                    "\(Color.red)Cannot prompt for configuration in non-interactive mode\(Color.reset)\n",
+                    "\(Color.red)Please run 'selfauth config' in an interactive terminal first\(Color.reset)\n",
+                ]
+
+                for msg in messages {
+                    msg.withCString { ptr in
+                        let _ = write(2, ptr, strlen(ptr))
+                    }
+                }
+
                 exit(1)
             }
 
