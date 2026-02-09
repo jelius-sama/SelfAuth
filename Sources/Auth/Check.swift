@@ -1,3 +1,5 @@
+import Foundation
+
 struct AuthCheck {
     static func handler(req: HTTPRequest) -> APIRouter.Response {
         return APIRouter.runSync {
@@ -27,11 +29,21 @@ struct AuthCheck {
                 )
             }
 
-            // TODO: Create a template
-            let successHTML = """
-                """
+            do {
+                guard
+                    let url = Bundle.module.url(
+                        forResource: "authorized",
+                        withExtension: "html",
+                    )
+                else {
+                    return .Success(.html("Authorized", status: .ok))
+                }
 
-            return .Success(.html(successHTML, status: .ok))
+                let html = try String(contentsOf: url, encoding: .utf8)
+                return .Success(HTTPResponse.html(html, status: .ok))
+            } catch {
+                return .Success(.html("Authorized", status: .ok))
+            }
         }
     }
 

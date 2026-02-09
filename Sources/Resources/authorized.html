@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication Status</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=VT323&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-primary: #0a0e14;
+      --bg-secondary: #131820;
+      --bg-tertiary: #1a1f28;
+      --border-color: #2d3541;
+      --text-primary: #e6e6e6;
+      --text-secondary: #8a93a5;
+      --text-muted: #5c6370;
+      --accent-green: #00ff88;
+      --accent-cyan: #00ddff;
+      --glow-green: rgba(0, 255, 136, 0.3);
+      --scanline-opacity: 0.05;
+    }
+    
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.97; }
+    }
+    
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+    
+    @keyframes glow-pulse {
+      0%, 100% { text-shadow: 0 0 10px var(--glow-green), 0 0 20px var(--glow-green); }
+      50% { text-shadow: 0 0 15px var(--glow-green), 0 0 30px var(--glow-green); }
+    }
+    
+    @keyframes slideIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes checkmark {
+      0% {
+        stroke-dashoffset: 100;
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+      }
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      animation: flicker 0.15s infinite;
+      padding: 1rem;
+    }
+    
+    /* CRT Effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(0, 0, 0, var(--scanline-opacity)) 50%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    
+    /* Scanline animation */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(0, 255, 136, 0.1),
+        transparent
+      );
+      animation: scanline 6s linear infinite;
+      pointer-events: none;
+      z-index: 9998;
+    }
+    
+    .container {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      box-shadow: 
+        0 0 30px rgba(0, 255, 136, 0.1),
+        inset 0 0 60px rgba(0, 255, 136, 0.02);
+      animation: slideIn 0.5s ease;
+      text-align: center;
+    }
+    
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent,
+        var(--accent-green) 30%,
+        var(--accent-cyan) 70%,
+        transparent
+      );
+    }
+    
+    .status-icon {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 1.5rem;
+      position: relative;
+    }
+    
+    .status-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .checkmark-circle {
+      stroke: var(--accent-green);
+      stroke-width: 3;
+      fill: none;
+      filter: drop-shadow(0 0 10px var(--glow-green));
+    }
+    
+    .checkmark-check {
+      stroke: var(--accent-green);
+      stroke-width: 4;
+      fill: none;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: checkmark 0.8s ease-in-out 0.3s forwards;
+      filter: drop-shadow(0 0 5px var(--glow-green));
+    }
+    
+    .spinner {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      border: 3px solid var(--border-color);
+      border-top: 3px solid var(--accent-cyan);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      box-shadow: 0 0 20px rgba(0, 221, 255, 0.3);
+    }
+    
+    h1 {
+      font-family: 'VT323', monospace;
+      font-size: 2.5rem;
+      color: var(--accent-green);
+      letter-spacing: 3px;
+      margin-bottom: 0.5rem;
+      text-shadow: 
+        0 0 10px var(--glow-green),
+        0 0 20px var(--glow-green);
+      animation: glow-pulse 3s ease-in-out infinite;
+    }
+    
+    .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      letter-spacing: 1px;
+    }
+    
+    .subtitle::before {
+      content: '▸ ';
+      color: var(--accent-cyan);
+    }
+    
+    .action-button {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      margin-top: 1.5rem;
+      border: 1px solid var(--accent-green);
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--accent-green);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 500;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+    
+    .action-button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(0, 255, 136, 0.3), transparent);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+      border-radius: 50%;
+    }
+    
+    .action-button:hover::before {
+      width: 400px;
+      height: 400px;
+    }
+    
+    .action-button:hover {
+      background: rgba(0, 255, 136, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 30px var(--glow-green);
+    }
+    
+    .action-button:active {
+      transform: translateY(0);
+    }
+    
+    .footer-text {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container {
+        padding: 2rem 1.5rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .status-icon {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Checking State -->
+  <div id="checking-state">
+    <div class="spinner"></div>
+    <h1>VERIFYING</h1>
+    <div class="subtitle">Checking Authentication Status</div>
+  </div>
+
+  <!-- Authenticated State -->
+  <div id="authenticated-state" class="hidden">
+    <div class="status-icon">
+      <svg viewBox="0 0 100 100">
+        <circle class="checkmark-circle" cx="50" cy="50" r="45"/>
+        <path class="checkmark-check" d="M25,50 L40,65 L75,30"/>
+      </svg>
+    </div>
+    
+    <h1>AUTHENTICATED</h1>
+    <div class="subtitle">Session Active</div>
+    
+    <a href="/" class="action-button">▸ Continue to Application</a>
+    
+    <div class="footer-text">
+      Your session is secure and encrypted
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    'use strict';
+    
+    const checkingState = document.getElementById('checking-state');
+    const authenticatedState = document.getElementById('authenticated-state');
+
+    checkingState.classList.add('hidden');
+    authenticatedState.classList.remove('hidden');
+  })();
+</script>
+
+</body>
+</html>
