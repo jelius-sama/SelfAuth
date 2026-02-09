@@ -27,30 +27,11 @@ struct AuthCheck {
                 )
             }
 
-            // If someone accesses /_auth/check directly with valid auth,
-            // redirect to home instead of showing "authorized" text
-            let originalPath = req.headers["X-SelfAuth-Original-URI"].first ?? "/"
-            if originalPath.starts(with: "/_auth/check") {
-                return .Success(
-                    HTTPResponse(
-                        status: .temporaryRedirect,
-                        headers: ["Location": "/"],
-                        body: nil
-                    )
-                )
-            }
+            // TODO: Create a template
+            let successHTML = """
+                """
 
-            if req.path.starts(with: "/_auth/check") {
-                return .Success(
-                    HTTPResponse(
-                        status: .temporaryRedirect,
-                        headers: ["Location": "/"],
-                        body: nil
-                    )
-                )
-            }
-
-            return .Success(.text("authorized"))
+            return .Success(.html(successHTML, status: .ok))
         }
     }
 
