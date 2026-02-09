@@ -17,14 +17,12 @@ jobs:
         os: [ubuntu-latest, macos-latest]
 
     steps:
-      - name: Checkout repository
+      # ---- Checkout ----
+      - name: Checkout repository (recursive)
         uses: actions/checkout@v4
-
-      # ---- Swift ----
-      - name: Set up Swift
-        uses: swift-actions/setup-swift@v2
         with:
-          swift-version: "5.9"
+          submodules: recursive
+          fetch-depth: 0
 
       # ---- Go ----
       - name: Set up Go
@@ -32,19 +30,47 @@ jobs:
         with:
           go-version: "1.22"
 
-      # ---- Linux system deps ----
-      - name: Install system dependencies (Linux only)
+      # ---- Swift (macOS) ----
+      - name: Set up Swift 6.0 (macOS)
+        if: runner.os == 'macOS'
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0"
+
+      # ---- Swift (Linux) ----
+      - name: Install Swift 6.0 (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libssl-dev
+          sudo apt-get install -y \
+            curl \
+            clang \
+            libicu-dev \
+            libssl-dev \
+            libcurl4-openssl-dev \
+            libxml2-dev \
+            libz-dev
+
+          SWIFT_VERSION=6.0
+          UBUNTU_VERSION=22.04
+
+          curl -fsSL https://download.swift.org/swift-${SWIFT_VERSION}-release/ubuntu${UBUNTU_VERSION}/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-ubuntu${UBUNTU_VERSION}.tar.gz \
+            | sudo tar -xz -C /opt
+
+          echo "/opt/swift-${SWIFT_VERSION}-RELEASE-ubuntu${UBUNTU_VERSION}/usr/bin" >> $GITHUB_PATH
+
+      # ---- Sanity check ----
+      - name: Verify toolchains
+        run: |
+          swift --version
+          go version
 
       # ---- Build ----
       - name: Build (compile check)
         run: |
           make build
 
-      # ---- Sanity check ----
+      # ---- Verify output ----
       - name: Verify binary exists
         run: |
           test -f bin/SelfAuth
