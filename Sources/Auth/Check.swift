@@ -9,7 +9,11 @@ struct AuthCheck {
                 let originalPath = req.headers["X-SelfAuth-Original-URI"].first ?? "/"
 
                 // Prevent redirect loop if somehow /_auth/check is the path
-                let redirectPath = originalPath == "/_auth/check" ? "/" : originalPath
+                let redirectPath =
+                    originalPath.starts(with: "/_auth/check")
+                    ? "/"
+                    : !originalPath.hasPrefix("/") || originalPath.hasPrefix("//")
+                        ? "/" : originalPath
 
                 let redirectURL = "/_auth/login?redirect=\(redirectPath)"
 
@@ -24,19 +28,22 @@ struct AuthCheck {
             }
 
             // If someone accesses /_auth/check directly with valid auth,
-            // redirect to home instead of showing "authorized" text
+            // redirect to original path or home instead of showing "authorized" text
             let originalPath = req.headers["X-SelfAuth-Original-URI"].first ?? "/"
-            if originalPath == "/_auth/check" {
-                return .Success(
-                    HTTPResponse(
-                        status: .temporaryRedirect,
-                        headers: ["Location": "/"],
-                        body: nil
-                    )
-                )
-            }
+            let redirectPath =
+                originalPath.starts(with: "/_auth/check")
+                ? "/"
+                : !originalPath.hasPrefix("/") || originalPath.hasPrefix("//")
+                    ? "/" : originalPath
 
-            return .Success(.text("authorized"))
+            // Return 302 redirect
+            return .Success(
+                HTTPResponse(
+                    status: .temporaryRedirect,
+                    headers: ["Location": redirectPath],
+                    body: nil
+                )
+            )
         }
     }
 
