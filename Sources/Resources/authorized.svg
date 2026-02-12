@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="64" height="64" fill="#0a0e14" rx="8"/>
+  
+  <!-- Border accent -->
+  <rect x="2" y="2" width="60" height="60" fill="none" stroke="#00ff88" stroke-width="2" rx="6" opacity="0.3"/>
+  
+  <!-- Lock body -->
+  <rect x="22" y="32" width="20" height="18" fill="none" stroke="#00ff88" stroke-width="3" rx="2" filter="url(#glow)"/>
+  
+  <!-- Lock shackle -->
+  <path d="M 26 32 L 26 24 Q 26 18 32 18 Q 38 18 38 24 L 38 32" fill="none" stroke="#00ff88" stroke-width="3" stroke-linecap="round" filter="url(#glow)"/>
+  
+  <!-- Keyhole -->
+  <circle cx="32" cy="38" r="2.5" fill="#00ddff" filter="url(#glow)"/>
+  <rect x="30.5" y="38" width="3" height="6" fill="#00ddff" filter="url(#glow)"/>
+  
+  <!-- Top accent line -->
+  <line x1="8" y1="12" x2="56" y2="12" stroke="#00ddff" stroke-width="2" opacity="0.5"/>
+</svg>
