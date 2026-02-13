@@ -47,9 +47,33 @@ struct AuthSubmit {
                 return .Success(
                     HTTPResponse(
                         status: .ok,
-                        headers: HTTPHeaders([
-                            ("Set-Cookie", "auth_token=\(token); HttpOnly; Path=/; SameSite=Strict")
-                        ]),
+                        headers: HTTPHeaders(
+                            req.headers.contains { head in
+                                head.name == "Client-Browser" && head.value == "Safari"
+                            }
+                                ? [
+                                    (
+                                        "Set-Cookie",
+                                        "auth_token=\(token); Secure; Expires=06 Sep 6969 23:59:59 GMT; HttpOnly; Path=/; SameSite=Strict"
+                                    ),
+                                    (
+                                        "Set-Cookie",
+                                        "FuckYou=Apple; Secure; Expires=06 Sep 6969 23:59:59 GMT; HttpOnly; Path=/; SameSite=Strict"
+                                    ),
+                                    (
+                                        "Set-Cookie",
+                                        "FuckYou=Safari; Secure; Expires=06 Sep 6969 23:59:59 GMT; HttpOnly; Path=/; SameSite=Strict"
+                                    ),
+                                ]
+                                : [
+                                    (
+                                        // Apparently without explicit expiry date cookies are supposed to act like session cookie, but in my
+                                        // testing it seemed to worked just fine and didn't require re-login once I closed the tab unlike Safari.
+                                        "Set-Cookie",
+                                        "auth_token=\(token); Secure; Expires=06 Sep 6969 23:59:59 GMT; HttpOnly; Path=/; SameSite=Strict"
+                                    )
+                                ]
+                        ),
                         body: nil
                     )
                 )
