@@ -251,10 +251,7 @@ struct AuthSubmit {
             }
 
             let status = SendMail(
-                config.pointee.Host,
-                config.pointee.Port,
-                config.pointee.Username,
-                config.pointee.Password,
+                config,
                 config.pointee.From,
                 receiver,
                 subject,

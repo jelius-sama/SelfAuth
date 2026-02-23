@@ -1,3 +1,4 @@
 [submodule "Sources/Libmailer"]
 	path = Sources/Libmailer
 	url = https://github.com/jelius-sama/libmailer.git
+	branch = aws-sdk
