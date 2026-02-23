@@ -2,9 +2,9 @@ name: Build and Test Compile
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, aws-sdk ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, aws-sdk ]
 
 jobs:
   build:
